@@ -1,0 +1,51 @@
+COLABORADOR DEL MES · Firebase + GitHub Pages
+==============================================
+
+Archivos para GitHub (todos en la misma carpeta, sin subcarpetas):
+  index.html       → la app completa (votación + panel de administración). Ya tiene tu firebaseConfig.
+  firestore.rules  → reglas de seguridad (se pegan en Firebase, no hace falta subirlas a GitHub)
+  LEEME.txt        → estas instrucciones
+
+NO subas padron.txt ni nominados.txt a GitHub: tienen los DNI del personal y el repositorio es público.
+Esos dos archivos se cargan desde el panel de administración.
+
+
+1 · CREAR LA BASE DE DATOS (Firebase, proyecto colaborador-anio)
+   a. https://console.firebase.google.com → proyecto colaborador-anio.
+   b. Menú izquierdo: Compilación → Firestore Database → Crear base de datos.
+      Ubicación: southamerica-east1 (São Paulo) → Modo de producción → Crear.
+   c. Pestaña "Reglas": borra lo que haya, pega todo el contenido de firestore.rules.
+      Busca TU_CORREO@gmail.com y cámbialo por el correo con el que entrarás al panel.
+      Toca "Publicar".
+
+2 · CREAR TU USUARIO DE ADMINISTRACIÓN
+   a. Compilación → Authentication → Comenzar → "Correo electrónico/contraseña" → Habilitar → Guardar.
+   b. Pestaña "Usuarios" → Agregar usuario → el MISMO correo que pusiste en las reglas y una contraseña.
+
+3 · PUBLICAR EN GITHUB
+   a. En github.com crea un repositorio nuevo, público (ej. colaborador-del-mes).
+   b. "Add file → Upload files" → arrastra index.html, firestore.rules y LEEME.txt → Commit changes.
+   c. Settings → Pages → Source: "Deploy from a branch" → Branch: main, carpeta / (root) → Save.
+   d. En 1 o 2 minutos aparece el enlace: https://TU-USUARIO.github.io/colaborador-del-mes/
+   e. Vuelve a Firebase → Authentication → Configuración → Dominios autorizados → Agregar dominio:
+      TU-USUARIO.github.io
+
+4 · CARGAR LOS DATOS (una sola vez)
+   a. Abre el enlace agregando #admin al final:
+      https://TU-USUARIO.github.io/colaborador-del-mes/#admin
+   b. Entra con tu correo y contraseña.
+   c. Configuración: revisa el mes, pon la fecha de cierre y la de anuncio, marca "Votación abierta" → Guardar.
+   d. Cargar datos → Padrón: elige padron.txt → Cargar padrón (443 personas, 17 áreas).
+      Cargar datos → Nominados: elige nominados.txt → Cargar nominados (443).
+
+5 · COMPARTIR
+   El enlace sin #admin es el que va a todo el personal (Teams, WhatsApp, QR).
+   Cada persona entra con su DNI y vota por alguien de su área.
+
+CADA MES
+   - Antes de reiniciar: Resultados → Descargar votos (Excel).
+   - Configuración → Reiniciar votos → toca de nuevo para confirmar. Luego cambia el mes y la fecha de cierre.
+   - Si entra o sale personal, vuelve a cargar el padrón y los nominados con la lista completa.
+
+CAMBIAR ALGO DE LA APP
+   En GitHub abre index.html → ícono del lápiz → edita → Commit changes. En 1 minuto se actualiza.

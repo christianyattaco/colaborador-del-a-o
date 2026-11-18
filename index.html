@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Colaborador del Mes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --azul:#14294A; --azul-2:#1D3A63; --azul-claro:#F3F6FA; --azul-suave:#C9D4E3;
+    --oro:#C9A45C; --oro-texto:#9A7833; --tinta:#16202E; --gris:#6B7686; --gris-2:#98A2B0;
+    --borde:#E6EAF0; --borde-input:#D5DBE3; --fondo:#F6F7F9; --rojo:#A8322B; --rojo-fondo:#FBF1F0;
+    --verde:#2F6B45; --verde-fondo:#EEF6F0;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--fondo);color:var(--tinta);font-family:Inter,system-ui,sans-serif;font-weight:400;
+    -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;font-feature-settings:"cv11","ss01"}
+  .app{max-width:440px;min-height:100vh;margin:0 auto;background:#fff;display:flex;flex-direction:column;box-shadow:0 0 0 1px var(--borde)}
+  .app.ancha{max-width:1040px}
+  h1,h2,h3{margin:0;font-weight:300;letter-spacing:-.015em}
+  p{margin:0}
+  button{font:inherit;cursor:pointer}
+  [hidden]{display:none!important}
+  .pantalla{display:none;flex:1;flex-direction:column}
+  .pantalla.activa{display:flex;animation:entra .35s ease-out}
+  @keyframes entra{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  /* Encabezado */
+  .hero{position:relative;overflow:hidden;color:#fff;padding:30px 28px 34px;display:flex;flex-direction:column;
+    background:radial-gradient(120% 90% at 100% 0%,#24476F 0%,rgba(36,71,111,0) 60%),linear-gradient(160deg,#18304F 0%,#0F2140 100%)}
+  .hero::after,.res-cab::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(201,164,92,.7),transparent)}
+  .hero-top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:40px}
+  .logo-img{height:56px;max-width:200px;object-fit:contain;display:block}
+  .chip{font-size:11px;font-weight:500;letter-spacing:.01em;text-transform:none;padding:6px 12px;border-radius:999px;
+    border:1px solid rgba(255,255,255,.28);color:rgba(255,255,255,.9);white-space:nowrap}
+  .sobre{font-size:11px;font-weight:500;letter-spacing:.01em;text-transform:none;color:var(--oro);display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .sobre::before{content:"";width:28px;height:1px;background:var(--oro)}
+  .hero h1{font-size:34px;line-height:1.12;font-weight:300}
+  .hero h1 strong{font-weight:500}
+  .hero p{font-size:14.5px;line-height:1.6;color:rgba(255,255,255,.72);margin-top:12px;max-width:340px}
+
+  .cuerpo{flex:1;padding:28px;display:flex;flex-direction:column;gap:14px}
+  .pie{padding:0 24px 28px}
+  .label{font-size:11px;font-weight:500;letter-spacing:.01em;text-transform:none;color:var(--gris)}
+  .ayuda{font-size:13px;color:var(--gris);line-height:1.55}
+
+  .codigo{width:100%;height:58px;border-radius:8px;border:1px solid var(--borde-input);padding:0 16px;
+    font:300 26px Inter,sans-serif;letter-spacing:.01em;text-align:center;color:var(--tinta);background:#fff;transition:border-color .15s,box-shadow .15s}
+  .codigo::placeholder{color:#C3CAD4}
+  .codigo:focus,textarea:focus,.clave:focus,.campo:focus,.buscar:focus{outline:0;border-color:var(--azul-2);box-shadow:0 0 0 3px rgba(29,58,99,.08)}
+
+  .btn{width:100%;height:50px;border-radius:8px;border:0;background:var(--azul);color:#fff;font-size:15px;font-weight:500;letter-spacing:.01em;
+    display:flex;align-items:center;justify-content:center;gap:10px;transition:background .15s,opacity .15s}
+  .btn:hover{background:var(--azul-2)}
+  .btn:disabled{background:#B8C0CB;cursor:not-allowed}
+  .btn-sec{background:#fff;color:var(--azul);border:1px solid var(--borde-input)}
+  .btn-sec:hover{background:var(--azul-claro)}
+  .btn-sec:disabled{background:#fff;color:var(--gris-2)}
+  .btn-sec .spinner{border-color:rgba(20,41,74,.2);border-top-color:var(--azul)}
+  .btn-peligro{background:#fff;color:var(--rojo);border:1px solid #E7C3C0}
+  .btn-peligro:hover{background:var(--rojo-fondo)}
+  .btn-auto{width:auto;padding:0 22px;height:44px;font-size:14px}
+  .spinner{width:16px;height:16px;border-radius:50%;border:1.5px solid rgba(255,255,255,.35);border-top-color:#fff;animation:gira .8s linear infinite}
+  @keyframes gira{to{transform:rotate(360deg)}}
+
+  .error{display:none;background:var(--rojo-fondo);color:var(--rojo);border-left:2px solid var(--rojo);border-radius:4px;padding:11px 14px;font-size:13.5px;line-height:1.45;white-space:pre-line}
+  .error.ver{display:block}
+  .ok{background:var(--verde-fondo);color:var(--verde);border-left:2px solid var(--verde);border-radius:4px;padding:11px 14px;font-size:13.5px;line-height:1.45}
+
+  /* Nominados */
+  .barra{background:#fff;padding:20px 28px 22px;display:flex;flex-direction:column;gap:8px;border-bottom:1px solid var(--borde)}
+  .volver{background:none;border:0;padding:0;color:var(--gris);font-size:13px;min-height:30px;text-align:left;width:max-content;margin-bottom:6px}
+  .volver:hover{color:var(--azul)}
+  .eyebrow{font-size:11px;font-weight:500;letter-spacing:.01em;text-transform:none;color:var(--oro-texto)}
+  .barra h1{font-size:25px;line-height:1.2}
+  .buscar{width:100%;height:44px;border-radius:8px;border:1px solid var(--borde-input);padding:0 14px;font:400 14px Inter,sans-serif;background:#fff}
+  .lista{display:flex;flex-direction:column;gap:8px}
+  .tarjeta{display:flex;align-items:center;gap:14px;width:100%;min-height:68px;padding:12px 16px;border-radius:10px;
+    background:#fff;border:1px solid var(--borde);text-align:left;transition:border-color .15s,box-shadow .15s,background .15s}
+  .tarjeta:hover{border-color:var(--borde-input)}
+  .tarjeta[aria-checked="true"]{background:#FBFCFE;border-color:var(--azul-2);box-shadow:0 0 0 1px var(--azul-2),0 6px 18px -10px rgba(20,41,74,.35)}
+  .avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:500;font-size:12.5px;letter-spacing:.04em;
+    flex-shrink:0;background:var(--azul-claro);color:var(--azul-2);border:1px solid var(--borde);transition:all .15s}
+  .tarjeta[aria-checked="true"] .avatar{background:var(--azul);color:#fff;border-color:var(--azul)}
+  .nom{flex:1;display:flex;flex-direction:column;gap:3px;min-width:0}
+  .nom b{font-size:14.5px;font-weight:500;color:var(--tinta)}
+  .nom span{font-size:12px;color:var(--gris);letter-spacing:.01em}
+  .radio{width:18px;height:18px;border-radius:50%;border:1px solid var(--gris-2);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+  .tarjeta[aria-checked="true"] .radio{border-color:var(--azul-2)}
+  .tarjeta[aria-checked="true"] .radio::after{content:"";width:8px;height:8px;border-radius:50%;background:var(--azul-2)}
+  textarea{border-radius:8px;border:1px solid var(--borde-input);padding:12px 14px;font:400 14px/1.5 Inter,sans-serif;color:var(--tinta);resize:none;background:#fff;width:100%}
+  textarea::placeholder{color:var(--gris-2)}
+  .contador{font-size:11px;color:var(--gris-2);text-align:right;margin-top:-8px}
+
+  /* Gracias */
+  .gracias{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:48px 32px;gap:18px}
+  .sello{width:76px;height:76px;border-radius:50%;border:1px solid var(--oro);display:flex;align-items:center;justify-content:center;animation:aparece .6s ease-out;margin-bottom:6px}
+  .sello span{width:60px;height:60px;border-radius:50%;background:var(--azul);display:flex;align-items:center;justify-content:center}
+  @keyframes aparece{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+  .gracias h1{font-size:30px}
+  .gracias p{font-size:14.5px;color:var(--gris);line-height:1.6;max-width:320px}
+  .gracias p b{font-weight:500;color:var(--tinta)}
+  .partic{width:100%;max-width:320px;border-top:1px solid var(--borde);border-bottom:1px solid var(--borde);padding:18px 0;display:flex;flex-direction:column;gap:10px;text-align:left;margin:6px 0}
+  .partic-top{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;color:var(--gris);letter-spacing:.04em}
+  .partic-top b{font-size:22px;font-weight:300;color:var(--tinta);letter-spacing:-.01em}
+  .riel{height:3px;border-radius:99px;background:var(--borde);overflow:hidden}
+  .riel i{display:block;height:100%;background:var(--azul-2);border-radius:99px;transition:width .9s ease-out}
+
+  /* Panel de administración */
+  .res-cab{position:relative;color:#fff;padding:26px 32px 0;display:flex;flex-direction:column;gap:8px;
+    background:radial-gradient(80% 120% at 100% 0%,#24476F 0%,rgba(36,71,111,0) 60%),linear-gradient(160deg,#18304F 0%,#0F2140 100%)}
+  .res-cab.solo{padding-bottom:30px}
+  .res-cab .hero-top{margin-bottom:22px}
+  .res-cab h1{font-size:28px}
+  .res-cab p{color:rgba(255,255,255,.7);font-size:13.5px}
+  .tabs{display:flex;gap:4px;margin-top:20px;overflow-x:auto}
+  .tab{background:none;border:0;border-bottom:2px solid transparent;color:rgba(255,255,255,.65);padding:12px 14px;font-size:13.5px;font-weight:500;white-space:nowrap}
+  .tab:hover{color:#fff}
+  .tab[aria-selected="true"]{color:#fff;border-bottom-color:var(--oro)}
+  .panel{display:none;flex-direction:column;gap:16px}
+  .panel.activo{display:flex}
+  .fila-btn{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+  .kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid var(--borde);border-radius:10px}
+  .kpi{padding:18px 22px}
+  .kpi + .kpi{border-left:1px solid var(--borde)}
+  .kpi span{font-size:11px;color:var(--gris);font-weight:500;letter-spacing:.01em;text-transform:none}
+  .kpi b{display:block;font-size:32px;font-weight:300;letter-spacing:-.02em;margin-top:6px;font-variant-numeric:tabular-nums}
+  .grid-areas{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
+  .area{border:1px solid var(--borde);border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:14px;background:#fff}
+  .area-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .area-top h3{font-size:13px;font-weight:500;letter-spacing:.01em;text-transform:none}
+  .area-top span{font-size:12px;color:var(--gris);white-space:nowrap;font-variant-numeric:tabular-nums}
+  .rk{display:flex;flex-direction:column;gap:10px}
+  .rk-fila{display:grid;grid-template-columns:18px 1fr auto;gap:10px;align-items:center;font-size:13.5px}
+  .rk-fila .pos{color:var(--gris-2);font-size:12px;font-variant-numeric:tabular-nums}
+  .rk-fila.primero .pos{color:var(--oro-texto);font-weight:500}
+  .rk-fila.primero .n{font-weight:500}
+  .rk-fila .v{color:var(--gris);font-variant-numeric:tabular-nums}
+  .rk-fila.primero .v{color:var(--tinta);font-weight:500}
+  .rk-riel{grid-column:2/4;height:2px;border-radius:99px;background:var(--borde);overflow:hidden;margin-top:-6px}
+  .rk-riel i{display:block;height:100%;background:var(--azul-suave)}
+  .rk-fila.primero .rk-riel i{background:var(--oro)}
+  details{font-size:12.5px;color:var(--gris);border-top:1px solid var(--borde);padding-top:12px}
+  summary{cursor:pointer;color:var(--azul-2);font-weight:500;list-style:none}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:" +";color:var(--gris-2)}
+  details[open] summary::after{content:" −"}
+  details ul{margin:10px 0 0;padding-left:16px;display:flex;flex-direction:column;gap:8px;line-height:1.5}
+  details ul b{font-weight:500;color:var(--tinta)}
+  .empate{font-size:11px;color:var(--oro-texto);font-weight:500;letter-spacing:.1em;text-transform:none}
+  .clave,.campo{width:100%;height:46px;border-radius:8px;border:1px solid var(--borde-input);padding:0 14px;font:400 15px Inter,sans-serif;background:#fff;color:var(--tinta)}
+  .caja{border:1px solid var(--borde);border-radius:10px;padding:22px;display:flex;flex-direction:column;gap:12px;background:#fff}
+  .caja h2{font-size:18px;font-weight:400}
+  .caja textarea{font:400 13px/1.5 ui-monospace,Menlo,Consolas,monospace;resize:vertical;min-height:150px}
+  .dos{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+  .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+  .form-grid label{display:flex;flex-direction:column;gap:6px}
+  .switch{display:flex;align-items:center;gap:10px;font-size:14px}
+  .switch input{width:18px;height:18px;accent-color:var(--azul)}
+  .estado{font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:none;padding:5px 10px;border-radius:999px}
+  .estado.si{background:rgba(255,255,255,.12);color:#CFE7D6}
+  .estado.no{background:rgba(255,255,255,.12);color:#F2C9C5}
+
+  @media (max-width:560px){.kpis{grid-template-columns:1fr 1fr}.kpis .kpi:last-child{grid-column:1/3;border-left:0;border-top:1px solid var(--borde)}.res-cab{padding:24px 20px 0}.res-cab.solo{padding-bottom:24px}.cuerpo{padding:22px 18px}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  .codigo{letter-spacing:.2em}
+  .sobre{font-size:13px;font-weight:400;color:var(--oro)}
+  .label{font-size:13px;color:var(--tinta);font-weight:500}
+  .eyebrow{font-size:13px;font-weight:500}
+  .chip{font-size:12.5px;font-weight:400}
+  .kpi span{font-size:13px;font-weight:400}
+  .area-top h3{font-size:15px;font-weight:500;letter-spacing:-.005em}
+  .empate{font-size:12.5px}
+  .estado{font-size:12px;font-weight:500}
+  .archivo{font-size:13px;color:var(--gris)}
+  .archivo input{font:inherit;font-size:13px}
+  .estado,.empate,.label,.eyebrow,.sobre,.chip,.kpi span,.tab{letter-spacing:0}
+  .salir{background:none;border:1px solid rgba(255,255,255,.28);color:rgba(255,255,255,.85);border-radius:999px;padding:6px 12px;font-size:12.5px}
+  .salir:hover{background:rgba(255,255,255,.08)}
+
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- 1. Ingreso del DNI -->
+  <section class="pantalla" id="p-inicio">
+    <div class="hero">
+      <div class="hero-top">
+        <img class="logo-img" src="https://lh3.googleusercontent.com/d/1Le4XlcpzYshyDBkJt1GbM8w5WuW35UAA" alt="Logo">
+        <span class="chip" id="mes"></span>
+      </div>
+      <p class="sobre">Reconocimiento</p>
+      <h1>Colaborador <strong>del Mes</strong></h1>
+      <p>Elige al compañero de tu área que más destacó este mes. Tu voto es anónimo.</p>
+    </div>
+    <form class="cuerpo" id="f-dni" autocomplete="off">
+      <label class="label" for="dni">Ingresa tu DNI</label>
+      <input class="codigo" id="dni" maxlength="8" inputmode="numeric" pattern="[0-9]*" spellcheck="false" required>
+      <p class="ayuda">Solo puedes votar una vez. Tu DNI se usa únicamente para verificar que no votes dos veces; tu voto es anónimo.</p>
+      <div class="error" id="e-dni" role="alert"></div>
+      <p class="ayuda" id="cierre"></p>
+      <div style="margin-top:auto"><button class="btn" id="b-dni" type="submit">Continuar</button></div>
+    </form>
+  </section>
+
+  <!-- 2. Nominados del área -->
+  <section class="pantalla" id="p-nominados">
+    <div class="barra">
+      <button class="volver" type="button" id="b-volver">← Cambiar DNI</button>
+      <p class="eyebrow" id="area-nom"></p>
+      <h1>¿Quién destacó este mes?</h1>
+    </div>
+    <div class="cuerpo" style="background:var(--fondo);padding:20px 24px">
+      <input class="buscar" id="buscar" type="search" placeholder="Buscar por nombre o cargo…" hidden>
+      <div class="lista" id="lista" role="radiogroup" aria-label="Nominados"></div>
+      <p class="ayuda" id="sin-resultados" hidden>No hay nadie con ese nombre en tu área.</p>
+      <label class="label" for="razon" style="margin-top:14px">¿Por qué lo eliges? <span style="font-weight:400;color:var(--gris-2)">· opcional</span></label>
+      <textarea id="razon" rows="3" maxlength="500"></textarea>
+      <p class="contador" id="contador">0 / 500</p>
+      <p class="ayuda" style="font-size:12px">Solo puedes votar una vez · Tu voto es anónimo</p>
+      <div class="error" id="e-voto" role="alert"></div>
+    </div>
+    <div class="pie" style="background:var(--fondo)"><button class="btn" id="b-votar" type="button" disabled>Enviar mi voto</button></div>
+  </section>
+
+  <!-- 3. Gracias -->
+  <section class="pantalla" id="p-gracias">
+    <div class="gracias">
+      <div class="sello"><span><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+      <h1>¡Gracias por votar!</h1>
+      <p>Tu voto por <b id="g-nom"></b> quedó registrado.</p>
+      <div class="partic">
+        <div class="partic-top"><span id="g-area"></span><b id="g-pct">0%</b></div>
+        <div class="riel"><i id="g-riel" style="width:0"></i></div>
+        <span class="ayuda" id="g-detalle"></span>
+      </div>
+      <p id="g-anuncio"></p>
+      <button class="volver" type="button" id="b-otro" style="margin:8px auto 0">Volver al inicio</button>
+    </div>
+  </section>
+
+  <!-- 4. Ingreso de administración -->
+  <section class="pantalla" id="p-clave">
+    <div class="res-cab solo"><div class="hero-top"><img class="logo-img" src="https://lh3.googleusercontent.com/d/1Le4XlcpzYshyDBkJt1GbM8w5WuW35UAA" alt="Logo"></div><h1>Administración</h1><p>Acceso exclusivo para Recursos Humanos.</p></div>
+    <form class="cuerpo" id="f-clave" style="max-width:440px;width:100%;margin:0 auto">
+      <label class="label" for="correo">Correo</label>
+      <input class="clave" id="correo" type="email" required autocomplete="username">
+      <label class="label" for="clave">Contraseña</label>
+      <input class="clave" id="clave" type="password" required autocomplete="current-password">
+      <div class="error" id="e-clave" role="alert"></div>
+      <button class="btn" id="b-clave" type="submit">Entrar</button>
+    </form>
+  </section>
+
+  <!-- 5. Panel de administración -->
+  <section class="pantalla" id="p-admin">
+    <div class="res-cab">
+      <div class="hero-top" style="margin-bottom:18px"><img class="logo-img" src="https://lh3.googleusercontent.com/d/1Le4XlcpzYshyDBkJt1GbM8w5WuW35UAA" alt="Logo">
+        <span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end"><span class="estado" id="r-estado"></span><span class="chip" id="r-mes"></span><button class="salir" id="b-salir" type="button">Salir</button></span></div>
+      <h1>Administración</h1>
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" data-panel="t-resultados" aria-selected="true">Resultados</button>
+        <button class="tab" role="tab" data-panel="t-datos" aria-selected="false">Cargar datos</button>
+        <button class="tab" role="tab" data-panel="t-config" aria-selected="false">Configuración</button>
+      </div>
+    </div>
+    <div class="cuerpo">
+      <div class="panel activo" id="t-resultados">
+        <div class="kpis" id="kpis"></div>
+        <div class="grid-areas" id="areas"></div>
+        <div class="error" id="e-res" role="alert"></div>
+        <div class="fila-btn">
+          <button class="btn btn-sec btn-auto" id="b-actualizar" type="button">Actualizar</button>
+          <button class="btn btn-sec btn-auto" id="b-exportar" type="button">Descargar votos (Excel)</button>
+        </div>
+      </div>
+
+      <div class="panel" id="t-datos">
+        <p class="ayuda">Elige el archivo o pega las filas copiadas desde Excel. La lista que cargues reemplaza a la anterior, así que carga siempre la lista completa. Si alguien ya votó y sigue en la lista, su voto se mantiene.</p>
+        <div class="dos">
+          <div class="caja">
+            <h2>Padrón de votantes</h2>
+            <p class="ayuda">Columnas: <b>DNI · Área · Nombre</b>. Una fila por persona que vota.</p>
+            <label class="archivo">Archivo: <input type="file" id="a-padron" accept=".txt,.csv,.tsv"></label>
+            <textarea id="t-padron"></textarea>
+            <div class="error" id="e-padron" role="alert"></div>
+            <div class="ok" id="ok-padron" hidden></div>
+            <button class="btn btn-auto" id="b-padron" type="button">Cargar padrón</button>
+          </div>
+          <div class="caja">
+            <h2>Nominados</h2>
+            <p class="ayuda">Columnas: <b>Área · Nombre · Cargo</b>. El área tiene que escribirse igual que en el padrón.</p>
+            <label class="archivo">Archivo: <input type="file" id="a-nominados" accept=".txt,.csv,.tsv"></label>
+            <textarea id="t-nominados"></textarea>
+            <div class="error" id="e-nominados" role="alert"></div>
+            <div class="ok" id="ok-nominados" hidden></div>
+            <button class="btn btn-auto" id="b-nominados" type="button">Cargar nominados</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="t-config">
+        <div class="caja">
+          <h2>Votación del mes</h2>
+          <div class="form-grid">
+            <label><span class="label">Mes</span><input class="campo" id="c-mes"></label>
+            <label><span class="label">Cierra el</span><input class="campo" id="c-cierre" type="date"></label>
+            <label><span class="label">Ganadores se anuncian el</span><input class="campo" id="c-anuncio" type="date"></label>
+          </div>
+          <label class="switch"><input type="checkbox" id="c-abierta"> Votación abierta</label>
+          <p class="ayuda">Si quitas el check, nadie puede votar. Después de la fecha de cierre (a las 23:59) la votación se cierra sola.</p>
+          <div class="error" id="e-config" role="alert"></div>
+          <div class="ok" id="ok-config" hidden></div>
+          <button class="btn btn-auto" id="b-config" type="button" style="align-self:flex-start">Guardar</button>
+        </div>
+        <div class="caja">
+          <h2>Empezar un nuevo mes</h2>
+          <p class="ayuda">Borra todos los votos y deja a todos habilitados para votar otra vez. El padrón y los nominados se quedan. Antes, descarga los votos desde Resultados si quieres guardarlos.</p>
+          <div class="error" id="e-reiniciar" role="alert"></div>
+          <div class="ok" id="ok-reiniciar" hidden></div>
+          <button class="btn btn-peligro btn-auto" id="b-reiniciar" type="button" style="align-self:flex-start">Reiniciar votos</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js';
+import { getFirestore, doc, getDoc, getDocs, collection, query, where, runTransaction, writeBatch, setDoc, serverTimestamp, Timestamp }
+  from 'https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js';
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+  from 'https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js';
+
+/* ================= Configuración de Firebase ================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyAHXg1WFqyqs461VWGYuuSHshLJ926oeaA",
+  authDomain: "colaborador-anio.firebaseapp.com",
+  projectId: "colaborador-anio",
+  storageBucket: "colaborador-anio.firebasestorage.app",
+  messagingSenderId: "986797258764",
+  appId: "1:986797258764:web:97450065ce6bed90ea1629"
+};
+/* ============================================================ */
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+/* ---------- Utilidades ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const iniciales = n => String(n).trim().split(/\s+/).filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase();
+const pct = (a, b) => (b ? Math.round(a * 100 / b) : 0);
+const sinTildes = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const slug = s => sinTildes(s).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 120);
+const limpiarDni = x => { let d = String(x == null ? '' : x).replace(/\D/g, ''); if (d.length === 7) d = '0' + d; return d; };
+const verFecha = iso => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || ''); return m ? `${m[3]}/${m[2]}/${m[1]}` : ''; };
+
+// Convierte "URIBE ZAVALA FRANCISCO" en "Uribe Zavala Francisco" (si el texto ya viene con minúsculas, lo deja igual)
+const SIGLAS = new Set(['SSOMA', 'TIC', 'TI', 'CAD', 'PMO', 'SIG', 'GIS', 'BD', 'HRBP', 'RR.HH.', 'II', 'III', 'IV', 'PCP', 'SAC']);
+const MENORES = new Set(['de', 'del', 'la', 'las', 'los', 'y', 'e', 'o', 'a', 'al', 'en', 'para', 'por', 'con']);
+function bonito(texto, frase) {
+  const t = String(texto || '').trim().replace(/\s+/g, ' ');
+  if (!t || t !== t.toUpperCase()) return t;
+  return t.split(' ').map((p, i) => {
+    if (SIGLAS.has(p) || (p === 'I' && i > 0)) return p;
+    if (p === 'SR.' || p === 'JR.') return p.charAt(0) + p.slice(1).toLowerCase();
+    const min = p.toLowerCase();
+    if (i > 0 && (frase || MENORES.has(min))) return min;
+    return min.charAt(0).toUpperCase() + min.slice(1);
+  }).join(' ');
+}
+
+function ver(id) {
+  document.querySelectorAll('.pantalla').forEach(p => p.classList.toggle('activa', p.id === id));
+  $('app').classList.toggle('ancha', id === 'p-admin' || id === 'p-clave');
+  window.scrollTo(0, 0);
+}
+function cargando(btn, si, texto) {
+  if (!btn.dataset.txt) btn.dataset.txt = btn.textContent;
+  btn.disabled = si;
+  btn.innerHTML = si ? '<span class="spinner"></span>' + esc(texto || 'Un momento…') : esc(btn.dataset.txt);
+}
+function error(id, msg) { const e = $(id); e.textContent = msg || ''; e.classList.toggle('ver', !!msg); }
+function aviso(id, msg) { const e = $(id); e.textContent = msg || ''; e.hidden = !msg; }
+function mensaje(e) {
+  const c = e && e.code;
+  if (c === 'permission-denied') return 'No tienes permiso para esta acción.';
+  if (c === 'unavailable' || c === 'deadline-exceeded') return 'No se pudo conectar. Revisa tu internet e inténtalo de nuevo.';
+  return (e && e.message) || 'Ocurrió un error. Inténtalo de nuevo.';
+}
+
+/* ---------- Configuración pública ---------- */
+async function leerConfig() {
+  const s = await getDoc(doc(db, 'config', 'general'));
+  const c = s.exists() ? s.data() : {};
+  const cierreTs = c.cierre && c.cierre.toMillis ? c.cierre.toMillis() : null;
+  return {
+    mes: c.mes || '', cierre: c.cierreTexto || '', anuncio: c.anuncio || '',
+    abierta: c.abierta === true && (!cierreTs || Date.now() < cierreTs), activa: c.abierta === true
+  };
+}
+
+/* ---------- Flujo de votación ---------- */
+let estado = { dni: '', area: '', areaId: '', elegido: null, nominados: [] };
+
+async function cargarInfo() {
+  try {
+    const i = await leerConfig();
+    $('mes').textContent = i.mes;
+    $('mes').hidden = !i.mes;
+    $('cierre').textContent = i.abierta ? (i.cierre ? 'La votación cierra el ' + verFecha(i.cierre) + '.' : '') : 'La votación está cerrada.';
+    $('b-dni').disabled = !i.abierta; $('dni').disabled = !i.abierta;
+  } catch (e) { error('e-dni', mensaje(e)); }
+}
+
+$('dni').addEventListener('input', function () { this.value = this.value.replace(/\D/g, '').slice(0, 8); });
+$('f-dni').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const d = limpiarDni($('dni').value);
+  if (d.length !== 8) { error('e-dni', 'Escribe tu DNI completo (8 dígitos).'); return; }
+  error('e-dni');
+  cargando($('b-dni'), true, 'Verificando…');
+  try {
+    const p = await getDoc(doc(db, 'padron', d));
+    if (!p.exists()) throw new Error('Ese DNI no está registrado. Revísalo o avísale a Recursos Humanos.');
+    if (p.data().usado) throw new Error('Este DNI ya votó este mes.');
+    const { area, areaId } = p.data();
+    const q = await getDocs(query(collection(db, 'nominados'), where('areaId', '==', areaId)));
+    const nominados = q.docs.map(x => ({ id: x.id, ...x.data() })).sort((a, b) => (a.orden || 0) - (b.orden || 0));
+    if (!nominados.length) throw new Error('Tu área todavía no tiene nominados. Avísale a Recursos Humanos.');
+    estado = { dni: d, area, areaId, elegido: null, nominados };
+    pintarNominados();
+    ver('p-nominados');
+  } catch (e) { error('e-dni', e.code ? mensaje(e) : e.message); }
+  finally { cargando($('b-dni'), false); }
+});
+
+function pintarNominados() {
+  $('area-nom').textContent = estado.area;
+  $('razon').value = ''; $('contador').textContent = '0 / 500';
+  $('buscar').value = ''; $('buscar').hidden = estado.nominados.length <= 8; $('sin-resultados').hidden = true;
+  error('e-voto');
+  $('lista').innerHTML = estado.nominados.map(n =>
+    `<button type="button" class="tarjeta" role="radio" aria-checked="false" data-id="${esc(n.id)}" data-busca="${esc(sinTildes(n.nombre + ' ' + (n.cargo || '')))}">` +
+    `<div class="avatar">${esc(iniciales(n.nombre))}</div>` +
+    `<div class="nom"><b>${esc(n.nombre)}</b><span>${esc(n.cargo)}</span></div><div class="radio"></div></button>`).join('');
+  $('b-votar').disabled = true;
+}
+
+$('buscar').addEventListener('input', function () {
+  const q = sinTildes(this.value.trim()); let hay = 0;
+  document.querySelectorAll('.tarjeta').forEach(t => {
+    const si = !q || t.dataset.busca.includes(q) || t.getAttribute('aria-checked') === 'true';
+    t.hidden = !si; if (si) hay++;
+  });
+  $('sin-resultados').hidden = hay > 0;
+});
+
+$('lista').addEventListener('click', ev => {
+  const t = ev.target.closest('.tarjeta'); if (!t) return;
+  estado.elegido = t.dataset.id;
+  document.querySelectorAll('.tarjeta').forEach(b => b.setAttribute('aria-checked', b === t));
+  $('b-votar').disabled = false;
+});
+$('razon').addEventListener('input', function () { $('contador').textContent = this.value.length + ' / 500'; });
+$('b-otro').addEventListener('click', () => { $('dni').value = ''; error('e-dni'); ver('p-inicio'); cargarInfo(); });
+$('b-volver').addEventListener('click', () => { $('dni').value = ''; ver('p-inicio'); $('dni').focus(); });
+
+$('b-votar').addEventListener('click', async () => {
+  if (!estado.elegido) return;
+  error('e-voto');
+  cargando($('b-votar'), true, 'Enviando…');
+  const { dni, areaId, area } = estado;
+  try {
+    // Todo en una transacción: marca el DNI, sube el contador del área y guarda el voto sin datos del votante
+    const r = await runTransaction(db, async tx => {
+      const pRef = doc(db, 'padron', dni), cRef = doc(db, 'conteo', areaId);
+      const p = await tx.get(pRef), c = await tx.get(cRef);
+      if (!p.exists()) throw new Error('Ese DNI no está registrado.');
+      if (p.data().usado) throw new Error('Este DNI ya votó este mes.');
+      if (!c.exists()) throw new Error('El área no está configurada. Avísale a Recursos Humanos.');
+      const n = (c.data().n || 0) + 1;
+      tx.update(pRef, { usado: true });
+      tx.set(doc(db, 'sello', areaId), { dni });
+      tx.update(cRef, { n });
+      tx.set(doc(db, 'votos', areaId + '_' + n), {
+        area: c.data().area, areaId, nominadoId: estado.elegido,
+        razon: $('razon').value.trim().slice(0, 500), fecha: serverTimestamp()
+      });
+      return { total: c.data().total || 0, votaron: n };
+    });
+    const n = estado.nominados.find(x => x.id === estado.elegido);
+    $('g-nom').textContent = n ? n.nombre : '';
+    $('g-area').textContent = 'Participación en ' + area;
+    const p = pct(r.votaron, r.total);
+    $('g-pct').textContent = p + '%';
+    $('g-detalle').textContent = r.votaron + ' de ' + r.total + ' compañeros ya votaron';
+    const i = await leerConfig().catch(() => ({}));
+    $('g-anuncio').textContent = i.anuncio ? 'Los ganadores se anuncian el ' + verFecha(i.anuncio) + '.' : '';
+    $('g-riel').style.width = '0';
+    ver('p-gracias');
+    setTimeout(() => { $('g-riel').style.width = p + '%'; }, 80);
+    estado.dni = '';
+  } catch (e) {
+    error('e-voto', e.code === 'permission-denied' ? 'No se pudo registrar el voto. Puede que la votación esté cerrada o que este DNI ya haya votado.' : (e.code ? mensaje(e) : e.message));
+  } finally { cargando($('b-votar'), false); }
+});
+
+/* ---------- Administración ---------- */
+$('f-clave').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  error('e-clave');
+  cargando($('b-clave'), true, 'Entrando…');
+  try {
+    await signInWithEmailAndPassword(auth, $('correo').value.trim(), $('clave').value);
+    await entrarAdmin();
+  } catch (e) {
+    const c = e && e.code || '';
+    error('e-clave', /invalid|wrong-password|user-not-found/.test(c) ? 'Correo o contraseña incorrectos.'
+      : c === 'permission-denied' ? 'Este correo no tiene acceso al panel. Revisa que sea el mismo que pusiste en las reglas de Firestore.' : mensaje(e));
+    signOut(auth).catch(() => {});
+  } finally { cargando($('b-clave'), false); }
+});
+
+async function entrarAdmin() {
+  await cargarResultados();
+  ver('p-admin');
+  cargarConfig();
+}
+
+$('b-salir').addEventListener('click', async () => { await signOut(auth); $('clave').value = ''; ver('p-clave'); });
+
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+  document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', x === t));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('activo', p.id === t.dataset.panel));
+}));
+
+async function cargarResultados() {
+  const [i, con, nom, vot] = await Promise.all([leerConfig(), getDocs(collection(db, 'conteo')), getDocs(collection(db, 'nominados')), getDocs(collection(db, 'votos'))]);
+  const areas = {};
+  con.forEach(c => { areas[c.id] = { area: c.data().area, total: c.data().total || 0, votaron: c.data().n || 0, ranking: {} }; });
+  nom.forEach(n => {
+    const d = n.data(), a = areas[d.areaId] || (areas[d.areaId] = { area: d.area, total: 0, votaron: 0, ranking: {} });
+    a.ranking[n.id] = { nombre: d.nombre, votos: 0, razones: [] };
+  });
+  vot.forEach(v => {
+    const d = v.data(), a = areas[d.areaId]; if (!a) return;
+    const r = a.ranking[d.nominadoId] || (a.ranking[d.nominadoId] = { nombre: '(ya no está en la lista)', votos: 0, razones: [] });
+    r.votos++; if (d.razon) r.razones.push(d.razon);
+  });
+  const lista = Object.values(areas).filter(a => a.total || Object.keys(a.ranking).length)
+    .map(a => ({ ...a, ranking: Object.values(a.ranking).sort((x, y) => y.votos - x.votos || x.nombre.localeCompare(y.nombre, 'es')) }))
+    .sort((x, y) => x.area.localeCompare(y.area, 'es'));
+  pintarResultados({ mes: i.mes, abierta: i.abierta, areas: lista });
+}
+
+$('b-actualizar').addEventListener('click', async function () {
+  cargando(this, true, 'Actualizando…'); error('e-res');
+  try { await cargarResultados(); } catch (e) { error('e-res', mensaje(e)); } finally { cargando(this, false); }
+});
+
+function pintarResultados(r) {
+  $('r-mes').textContent = r.mes || 'Sin mes';
+  $('r-estado').textContent = r.abierta ? 'Abierta' : 'Cerrada';
+  $('r-estado').className = 'estado ' + (r.abierta ? 'si' : 'no');
+  let total = 0, votaron = 0;
+  r.areas.forEach(a => { total += a.total; votaron += a.votaron; });
+  $('kpis').innerHTML =
+    `<div class="kpi"><span>Participación general</span><b>${pct(votaron, total)}%</b></div>` +
+    `<div class="kpi"><span>Votos emitidos</span><b>${votaron} / ${total}</b></div>` +
+    `<div class="kpi"><span>Áreas</span><b>${r.areas.length}</b></div>`;
+  if (!r.areas.length) { $('areas').innerHTML = '<p class="ayuda">Todavía no hay datos. Entra a <b>Cargar datos</b> y carga el padrón y los nominados.</p>'; return; }
+  $('areas').innerHTML = r.areas.map(a => {
+    const max = a.ranking.length ? a.ranking[0].votos : 0;
+    const empate = max > 0 && a.ranking.filter(n => n.votos === max).length > 1;
+    const filas = a.ranking.filter(n => n.votos > 0).slice(0, 5).map((n, i) => {
+      const lider = n.votos === max;
+      return `<div class="rk-fila${lider ? ' primero' : ''}"><span class="pos">${i + 1}</span><span class="n">${esc(n.nombre)}</span><span class="v">${n.votos}</span>` +
+        `<span class="rk-riel"><i style="width:${pct(n.votos, max || 1)}%"></i></span></div>`;
+    }).join('');
+    const razones = [];
+    a.ranking.forEach(n => n.razones.forEach(t => razones.push(`<li><b>${esc(n.nombre)}:</b> ${esc(t)}</li>`)));
+    return `<article class="area"><div class="area-top"><h3>${esc(a.area)}</h3><span>${a.votaron} de ${a.total} · ${pct(a.votaron, a.total)}%</span></div>` +
+      `<div class="riel"><i style="width:${pct(a.votaron, a.total)}%"></i></div>` +
+      (!a.ranking.length ? '<p class="ayuda">Esta área no tiene nominados.</p>' : max === 0 ? '<p class="ayuda">Aún no hay votos.</p>' : `<div class="rk">${filas}</div>`) +
+      (empate ? '<p class="empate">Empate en el primer lugar</p>' : '') +
+      (razones.length ? `<details><summary>Ver razones (${razones.length})</summary><ul>${razones.join('')}</ul></details>` : '') +
+      '</article>';
+  }).join('');
+}
+
+$('b-exportar').addEventListener('click', async function () {
+  cargando(this, true, 'Preparando…'); error('e-res');
+  try {
+    const [vot, nom] = await Promise.all([getDocs(collection(db, 'votos')), getDocs(collection(db, 'nominados'))]);
+    const nombres = {}; nom.forEach(n => { nombres[n.id] = n.data(); });
+    const filas = vot.docs.map(v => v.data()).sort((a, b) => (a.fecha?.toMillis() || 0) - (b.fecha?.toMillis() || 0));
+    const c = s => '"' + String(s == null ? '' : s).replace(/"/g, '""') + '"';
+    const fmt = new Intl.DateTimeFormat('es-PE', { timeZone: 'America/Lima', dateStyle: 'short', timeStyle: 'short' });
+    const csv = '﻿Fecha;Área;Nominado;Cargo;Razón\n' + filas.map(f => {
+      const n = nombres[f.nominadoId] || {};
+      return [f.fecha ? fmt.format(f.fecha.toDate()) : '', f.area, n.nombre || '', n.cargo || '', f.razon].map(c).join(';');
+    }).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = 'votos-' + slug($('r-mes').textContent || 'mes') + '.csv';
+    document.body.appendChild(a); a.click(); a.remove();
+  } catch (e) { error('e-res', mensaje(e)); } finally { cargando(this, false); }
+});
+
+/* ----- Carga de datos ----- */
+function leerFilas(texto, esTitulo) {
+  const filas = texto.split(/\r?\n/).filter(l => l.trim()).map(l => {
+    const sep = l.includes('\t') ? '\t' : (l.includes(';') ? ';' : ',');
+    return l.split(sep).map(x => x.trim().replace(/^"|"$/g, ''));
+  });
+  if (filas.length && esTitulo(filas[0])) filas.shift();
+  return filas;
+}
+
+// Escribe en tandas de 400 operaciones (Firestore permite hasta 500 por lote)
+async function enTandas(ops) {
+  for (let i = 0; i < ops.length; i += 400) {
+    const b = writeBatch(db);
+    ops.slice(i, i + 400).forEach(f => f(b));
+    await b.commit();
+  }
+}
+
+['padron', 'nominados'].forEach(cual => {
+  $('a-' + cual).addEventListener('change', async function () {
+    const f = this.files[0]; if (!f) return;
+    let t = await f.text();
+    if (t.includes('�')) t = new TextDecoder('windows-1252').decode(await f.arrayBuffer());
+    $('t-' + cual).value = t; this.value = '';
+  });
+});
+
+async function cargarPadron(filas) {
+  const vistos = {}, errores = [];
+  filas.forEach((f, i) => {
+    const dni = limpiarDni(f[0]), area = bonito(f[1]), nombre = bonito(f[2]);
+    if (!dni && !area) return;
+    if (dni.length !== 8) errores.push(`Fila ${i + 1}: DNI no válido (${f[0]})`);
+    else if (!area) errores.push(`Fila ${i + 1}: falta el área`);
+    else if (vistos[dni]) errores.push(`Fila ${i + 1}: DNI repetido (${dni})`);
+    else vistos[dni] = { area, areaId: slug(area), nombre };
+  });
+  if (errores.length) return { errores };
+
+  const [actuales, conteos] = await Promise.all([getDocs(collection(db, 'padron')), getDocs(collection(db, 'conteo'))]);
+  const previo = {}, ops = [];
+  actuales.forEach(p => { previo[p.id] = p.data(); if (!vistos[p.id]) ops.push(b => b.delete(p.ref)); });
+  const totales = {};
+  Object.entries(vistos).forEach(([dni, v]) => {
+    totales[v.areaId] = totales[v.areaId] || { area: v.area, total: 0 };
+    totales[v.areaId].total++;
+    ops.push(b => b.set(doc(db, 'padron', dni), { area: v.area, areaId: v.areaId, usado: previo[dni] ? previo[dni].usado === true : false }));
+  });
+  const nPrevio = {}; conteos.forEach(c => { nPrevio[c.id] = c.data().n || 0; });
+  Object.entries(totales).forEach(([id, t]) => ops.push(b => b.set(doc(db, 'conteo', id), { area: t.area, total: t.total, n: nPrevio[id] || 0 })));
+  conteos.forEach(c => { if (!totales[c.id]) ops.push(b => b.set(c.ref, { area: c.data().area, total: 0, n: c.data().n || 0 })); });
+  await enTandas(ops);
+  return { mensaje: `Listo: ${Object.keys(vistos).length} personas en ${Object.keys(totales).length} áreas.` };
+}
+
+async function cargarNominados(filas) {
+  const vistos = {}, errores = [];
+  filas.forEach((f, i) => {
+    const area = bonito(f[0]), nombre = bonito(f[1]), cargo = bonito(f[2], true);
+    if (!area && !nombre) return;
+    if (!area || !nombre) { errores.push(`Fila ${i + 1}: falta el área o el nombre`); return; }
+    const id = slug(area + ' ' + nombre);
+    if (vistos[id]) errores.push(`Fila ${i + 1}: nominado repetido (${nombre})`);
+    else vistos[id] = { area, areaId: slug(area), nombre, cargo, orden: i };
+  });
+  if (errores.length) return { errores };
+  const actuales = await getDocs(collection(db, 'nominados'));
+  const ops = [];
+  actuales.forEach(n => { if (!vistos[n.id]) ops.push(b => b.delete(n.ref)); });
+  Object.entries(vistos).forEach(([id, v]) => ops.push(b => b.set(doc(db, 'nominados', id), v)));
+  await enTandas(ops);
+  return { mensaje: `Listo: ${Object.keys(vistos).length} nominados.` };
+}
+
+function botonCarga(cual, fn, esTitulo) {
+  $('b-' + cual).addEventListener('click', async function () {
+    error('e-' + cual); aviso('ok-' + cual);
+    const filas = leerFilas($('t-' + cual).value, esTitulo);
+    if (!filas.length) { error('e-' + cual, 'Elige el archivo o pega las filas primero.'); return; }
+    if (filas.every(f => f.length < 2)) { error('e-' + cual, 'No encuentro las columnas. Copia las celdas directamente desde Excel o Google Sheets.'); return; }
+    cargando(this, true, `Cargando ${filas.length} filas…`);
+    try {
+      const r = await fn(filas);
+      if (r.errores) { error('e-' + cual, 'No se cargó nada. Corrige esto y vuelve a intentarlo:\n' + r.errores.slice(0, 30).join('\n')); return; }
+      aviso('ok-' + cual, r.mensaje);
+      $('t-' + cual).value = '';
+      cargarResultados().catch(() => {});
+    } catch (e) { error('e-' + cual, mensaje(e)); } finally { cargando(this, false); }
+  });
+}
+botonCarga('padron', cargarPadron, f => !/\d{6,}/.test(f[0]));
+botonCarga('nominados', cargarNominados, f => /^[áa]rea$/i.test(f[0]));
+
+/* ----- Configuración ----- */
+async function cargarConfig() {
+  try {
+    const s = await getDoc(doc(db, 'config', 'general'));
+    const c = s.exists() ? s.data() : {};
+    const hoy = new Intl.DateTimeFormat('es-PE', { timeZone: 'America/Lima', month: 'long', year: 'numeric' }).format(new Date()).replace(' de ', ' ');
+    $('c-mes').value = c.mes || hoy.charAt(0).toUpperCase() + hoy.slice(1);
+    $('c-cierre').value = c.cierreTexto || ''; $('c-anuncio').value = c.anuncio || '';
+    $('c-abierta').checked = c.abierta === true;
+  } catch (e) { error('e-config', mensaje(e)); }
+}
+
+$('b-config').addEventListener('click', async function () {
+  cargando(this, true, 'Guardando…'); error('e-config'); aviso('ok-config');
+  try {
+    const cierre = $('c-cierre').value;
+    await setDoc(doc(db, 'config', 'general'), {
+      mes: $('c-mes').value.trim(), anuncio: $('c-anuncio').value, abierta: $('c-abierta').checked,
+      cierreTexto: cierre, cierre: cierre ? Timestamp.fromDate(new Date(cierre + 'T23:59:59-05:00')) : null
+    });
+    aviso('ok-config', 'Guardado.');
+    await cargarResultados();
+  } catch (e) { error('e-config', mensaje(e)); } finally { cargando(this, false); }
+});
+
+$('b-reiniciar').addEventListener('click', async function () {
+  const b = this;
+  if (!b.dataset.confirmar) {
+    b.dataset.confirmar = '1'; b.textContent = 'Sí, borrar todos los votos';
+    error('e-reiniciar', 'Esto no se puede deshacer. Toca el botón otra vez para confirmar.');
+    setTimeout(() => { if (b.dataset.confirmar) { delete b.dataset.confirmar; b.textContent = 'Reiniciar votos'; error('e-reiniciar'); } }, 6000);
+    return;
+  }
+  delete b.dataset.confirmar; b.dataset.txt = 'Reiniciar votos';
+  cargando(b, true, 'Reiniciando…'); error('e-reiniciar'); aviso('ok-reiniciar');
+  try {
+    const [vot, usados, con, sel] = await Promise.all([
+      getDocs(collection(db, 'votos')), getDocs(query(collection(db, 'padron'), where('usado', '==', true))),
+      getDocs(collection(db, 'conteo')), getDocs(collection(db, 'sello'))]);
+    const ops = [];
+    vot.forEach(v => ops.push(x => x.delete(v.ref)));
+    sel.forEach(s => ops.push(x => x.delete(s.ref)));
+    usados.forEach(p => ops.push(x => x.update(p.ref, { usado: false })));
+    con.forEach(c => ops.push(x => x.update(c.ref, { n: 0 })));
+    await enTandas(ops);
+    aviso('ok-reiniciar', `Listo: se borraron ${vot.size} votos y ${usados.size} personas pueden votar de nuevo.`);
+    await cargarResultados();
+  } catch (e) { error('e-reiniciar', mensaje(e)); } finally { cargando(b, false); }
+});
+
+/* ---------- Arranque ---------- */
+function esAdmin() { return location.hash === '#admin' || /[?&]vista=(admin|resultados)/.test(location.search); }
+let sesion = undefined;
+onAuthStateChanged(auth, u => { const antes = sesion; sesion = u; if (antes === undefined) arrancar(); });
+function arrancar() {
+  if (esAdmin()) {
+    if (sesion) entrarAdmin().catch(() => { ver('p-clave'); });
+    else { ver('p-clave'); $('correo').focus(); }
+  } else { ver('p-inicio'); cargarInfo(); }
+}
+window.addEventListener('hashchange', arrancar);
+</script>
+</body>
+</html>

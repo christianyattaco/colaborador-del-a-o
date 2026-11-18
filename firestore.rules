@@ -1,0 +1,94 @@
+rules_version = '2';
+
+// Reglas de seguridad · Colaborador del Mes
+// Pégalas en Firebase > Firestore Database > Reglas > Publicar.
+// IMPORTANTE: cambia TU_CORREO@gmail.com por el correo con el que entras al panel de administración.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function esAdmin() {
+      return request.auth != null && request.auth.token.email in ['TU_CORREO@gmail.com'];
+    }
+
+    function config() { return get(/databases/$(database)/documents/config/general).data; }
+    function abierta() {
+      return config().abierta == true
+        && (!('cierre' in config()) || config().cierre == null || request.time < config().cierre);
+    }
+
+    function conteoAntes(a)   { return get(/databases/$(database)/documents/conteo/$(a)).data; }
+    function conteoDespues(a) { return getAfter(/databases/$(database)/documents/conteo/$(a)).data; }
+    function selloDespues(a)  { return getAfter(/databases/$(database)/documents/sello/$(a)).data; }
+    function idVoto(a)        { return a + '_' + string(conteoDespues(a).n); }
+    function hayVotoNuevo(a)  { return existsAfter(/databases/$(database)/documents/votos/$(idVoto(a))); }
+
+    function votoValido(id, v) {
+      return abierta()
+        && v.keys().hasOnly(['area', 'areaId', 'nominadoId', 'razon', 'fecha'])
+        && v.areaId is string && v.nominadoId is string
+        && v.razon is string && v.razon.size() <= 500
+        && v.fecha == request.time
+        && v.area == conteoAntes(v.areaId).area
+        && conteoDespues(v.areaId).n == conteoAntes(v.areaId).n + 1
+        && id == idVoto(v.areaId)
+        && get(/databases/$(database)/documents/nominados/$(v.nominadoId)).data.areaId == v.areaId
+        && dniValido(v.areaId, selloDespues(v.areaId).dni);
+    }
+
+    function dniValido(a, d) {
+      return get(/databases/$(database)/documents/padron/$(d)).data.areaId == a
+        && get(/databases/$(database)/documents/padron/$(d)).data.usado == false
+        && getAfter(/databases/$(database)/documents/padron/$(d)).data.usado == true;
+    }
+
+    // Configuración y nominados: todos pueden leer; solo el administrador escribe
+    match /config/{id} {
+      allow read: if true;
+      allow write: if esAdmin();
+    }
+    match /nominados/{id} {
+      allow read: if true;
+      allow write: if esAdmin();
+    }
+
+    // Padrón: se consulta un DNI a la vez (no se puede listar).
+    // Al votar solo puede pasar "usado" de false a true, junto con un voto válido.
+    match /padron/{dni} {
+      allow get: if true;
+      allow list, create, delete: if esAdmin();
+      allow update: if esAdmin() || (
+        resource.data.usado == false
+        && request.resource.data.usado == true
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usado'])
+        && selloDespues(resource.data.areaId).dni == dni
+        && hayVotoNuevo(resource.data.areaId)
+      );
+    }
+
+    // Contador de votos por área: al votar sube exactamente 1
+    match /conteo/{a} {
+      allow read: if true;
+      allow create, delete: if esAdmin();
+      allow update: if esAdmin() || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['n'])
+        && request.resource.data.n == resource.data.n + 1
+        && hayVotoNuevo(a)
+      );
+    }
+
+    // Sello: guarda solo el último DNI que votó en cada área, para que las reglas comprueben el voto.
+    // Nadie lo puede leer desde la app y se sobrescribe con cada voto.
+    match /sello/{a} {
+      allow read, delete: if esAdmin();
+      allow create, update: if request.resource.data.keys().hasOnly(['dni']) && hayVotoNuevo(a);
+    }
+
+    // Votos: no llevan DNI ni nombre del votante. Solo el administrador los lee.
+    match /votos/{id} {
+      allow read, delete: if esAdmin();
+      allow create: if votoValido(id, request.resource.data);
+    }
+
+  }
+}
